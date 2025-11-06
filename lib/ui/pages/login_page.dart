@@ -102,7 +102,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     const SizedBox(height: 16),
                     const Text(
-                      'PlayStation Rental',
+                      'PlayStation SticknPlay',
                       style: TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
@@ -118,7 +118,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     const Text(
-                      'penyewaan playstation kampus',
+                      'penyewaan playstation SticknPlay',
                       style: TextStyle(
                         fontSize: 16,
                         color: Colors.white70,
