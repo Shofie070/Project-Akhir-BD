@@ -13,11 +13,14 @@ app.use(bodyParser.json());
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const gameRoutes = require("./routes/gameRoutes");
+const consoleRoutes = require("./routes/consoleRoutes");
 
 // Gunakan routes
 app.use("/api", authRoutes); // untuk /api/login dan /api/register
 app.use("/api/users", userRoutes); // untuk manajemen users
 app.use("/api/games", gameRoutes); // games endpoint
+app.use("/api/bookings", require("./routes/boookingRoutes")); // bookings endpoint
+app.use("/api/consoles", consoleRoutes); // consoles endpoint
 
 
 // Cek koneksi database

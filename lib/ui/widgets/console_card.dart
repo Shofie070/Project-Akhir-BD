@@ -10,8 +10,8 @@ class ConsoleCard extends StatelessWidget {
     return Card(
       child: ListTile(
         leading: const Icon(Icons.videogame_asset),
-        title: Text(console.name),
-        subtitle: Text('Rp \\${console.pricePerHour.toStringAsFixed(0)} / hour'),
+        title: Text(console.jenisConsole),
+        subtitle: Text('Unit: ${console.nomorUnit} (${console.status})'),
         trailing: ElevatedButton(
           onPressed: () => Navigator.pushNamed(context, '/console', arguments: console),
           child: const Text('Detail'),

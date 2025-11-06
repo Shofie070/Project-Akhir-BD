@@ -12,16 +12,79 @@ import '../models/tariff_model.dart';
 
 class ApiService {
   final String baseUrl;
+  Map<String, dynamic>? currentUser;
+  String? token;
+  
   ApiService({this.baseUrl = 'http://localhost:4000/api'});
+
+  Future<Map<String, dynamic>> createBooking(Map<String, dynamic> bookingData) async {
+    if (token == null) throw Exception('Not authenticated');
+    
+    final res = await http.post(
+      Uri.parse('$baseUrl/bookings'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(bookingData),
+    );
+    
+    if (res.statusCode == 201) {
+      return jsonDecode(res.body);
+    } else {
+      throw Exception('Failed to create booking: ${res.body}');
+    }
+  }
+
+  Future<void> updateBookingStatus(int bookingId, String status) async {
+    final res = await http.put(
+      Uri.parse('$baseUrl/bookings/$bookingId/status'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'status': status}),
+    );
+    
+    if (res.statusCode != 200) {
+      throw Exception('Failed to update booking status: ${res.body}');
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getBookings() async {
+    if (token == null) throw Exception('Not authenticated');
+    
+    final res = await http.get(
+      Uri.parse('$baseUrl/bookings'),
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
+    
+    if (res.statusCode == 200) {
+      final List data = jsonDecode(res.body);
+      return List<Map<String, dynamic>>.from(data);
+    } else {
+      throw Exception('Failed to fetch bookings');
+    }
+  }
 
   // Consoles
   Future<List<ConsoleModel>> fetchConsoles() async {
-    final res = await http.get(Uri.parse('$baseUrl/consoles'));
-    if (res.statusCode == 200) {
-      final List data = jsonDecode(res.body);
-      return data.map((e) => ConsoleModel.fromMap(e)).toList();
-    } else {
-      throw Exception('Failed to load consoles');
+    try {
+      final uri = Uri.parse('$baseUrl/consoles');
+      print('Fetching consoles from: $uri');
+      
+      final res = await http.get(uri);
+      print('Response status: ${res.statusCode}');
+      print('Response body: ${res.body}');
+      
+      if (res.statusCode == 200) {
+        final List data = jsonDecode(res.body);
+        return data.map((e) => ConsoleModel.fromMap(e)).toList();
+      } else {
+        throw Exception('Failed to load consoles: ${res.body}');
+      }
+    } catch (e) {
+      print('Error fetching consoles: $e');
+      rethrow;
     }
   }
 
@@ -172,6 +235,41 @@ class ApiService {
       return data.map((e) => GameModel.fromMap(e)).toList();
     } else {
       throw Exception('Failed to load games');
+    }
+  }
+
+  Future<GameModel> createGame(GameModel game) async {
+    final res = await http.post(
+      Uri.parse('$baseUrl/games'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(game.toMap()),
+    );
+    if (res.statusCode == 201) {
+      final data = jsonDecode(res.body);
+      return GameModel.fromMap(data);
+    } else {
+      throw Exception('Failed to create game: ${res.body}');
+    }
+  }
+
+  Future<GameModel> updateGame(GameModel game) async {
+    final res = await http.put(
+      Uri.parse('$baseUrl/games/${game.id}'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(game.toMap()),
+    );
+    if (res.statusCode == 200) {
+      final data = jsonDecode(res.body);
+      return GameModel.fromMap(data);
+    } else {
+      throw Exception('Failed to update game: ${res.body}');
+    }
+  }
+
+  Future<void> deleteGame(int id) async {
+    final res = await http.delete(Uri.parse('$baseUrl/games/$id'));
+    if (res.statusCode != 200) {
+      throw Exception('Failed to delete game: ${res.body}');
     }
   }
 

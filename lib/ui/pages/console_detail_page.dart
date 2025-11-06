@@ -11,13 +11,14 @@ class ConsoleDetailPage extends StatelessWidget {
     final console = args is ConsoleModel ? args : null;
 
     return Scaffold(
-      appBar: AppBar(title: Text(console?.name ?? 'Console Detail')),
+      appBar: AppBar(title: Text(console?.jenisConsole ?? 'Console Detail')),
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Name: \\${console?.name ?? '-'}'),
-            Text('Price / hour: \\${console?.pricePerHour ?? 0}'),
+            Text('Console: ${console?.jenisConsole ?? '-'}'),
+            Text('Unit: ${console?.nomorUnit ?? '-'}'),
+            Text('Status: ${console?.status ?? '-'}'),
             const SizedBox(height: 12),
             ElevatedButton(onPressed: () => Navigator.pushNamed(context, '/booking', arguments: console), child: const Text('Book')),
           ],
