@@ -190,11 +190,13 @@ class _BookingPageState extends State<BookingPage> {
                         'status': 'pending'
                       });
 
+                      if (!mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Booking berhasil dibuat!')),
                       );
                       Navigator.pop(context);
                     } catch (e) {
+                      if (!mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Error: ${e.toString()}')),
                       );

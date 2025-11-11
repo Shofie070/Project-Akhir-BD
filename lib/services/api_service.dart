@@ -70,11 +70,8 @@ class ApiService {
   Future<List<ConsoleModel>> fetchConsoles() async {
     try {
       final uri = Uri.parse('$baseUrl/consoles');
-      print('Fetching consoles from: $uri');
       
       final res = await http.get(uri);
-      print('Response status: ${res.statusCode}');
-      print('Response body: ${res.body}');
       
       if (res.statusCode == 200) {
         final List data = jsonDecode(res.body);
@@ -83,7 +80,6 @@ class ApiService {
         throw Exception('Failed to load consoles: ${res.body}');
       }
     } catch (e) {
-      print('Error fetching consoles: $e');
       rethrow;
     }
   }

@@ -20,7 +20,7 @@ class RentalProvider extends ChangeNotifier {
     try {
       _rentals = await _apiService.fetchRentals();
     } catch (e) {
-      print('Error fetching rentals: $e');
+      // Error is silently handled to prevent UI disruption
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -33,8 +33,8 @@ class RentalProvider extends ChangeNotifier {
       _rentals.add(newRental);
       notifyListeners();
     } catch (e) {
-      print('Error creating rental: $e');
-      throw e;
+      // Error is silently handled to prevent UI disruption
+      rethrow;
     }
   }
 }

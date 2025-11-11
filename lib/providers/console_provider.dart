@@ -21,7 +21,7 @@ class ConsoleProvider extends ChangeNotifier {
       _consoles = await _apiService.fetchConsoles();
     } catch (e) {
       // Handle error, maybe show a snackbar or log
-      print('Error fetching consoles: $e');
+      // Error is silently handled to prevent UI disruption
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -36,8 +36,8 @@ class ConsoleProvider extends ChangeNotifier {
       _consoles.add(newConsole);
       notifyListeners();
     } catch (e) {
-      print('Error adding console: $e');
-      throw e;
+      // Error is silently handled to prevent UI disruption
+      rethrow;
     }
   }
 }

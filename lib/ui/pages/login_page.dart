@@ -20,9 +20,8 @@ class _LoginPageState extends State<LoginPage> {
   setState(() => loading = true);
   try {
     final resp = await api.login(nimController.text.trim(), passwordController.text.trim());
+    if (!mounted) return;
     setState(() => loading = false);
-
-    print('Login response: $resp'); // Debug print
 
     if (resp['token'] != null) {
       // Simpan token dan data user
@@ -30,32 +29,33 @@ class _LoginPageState extends State<LoginPage> {
       api.currentUser = resp['user'];
       
       final userRole = resp['user']['role'];
-      print('User role: $userRole'); // Debug print
 
       if (userRole == 'Admin') {
-        print('Redirecting to admin page'); // Debug print
-        Navigator.pushReplacementNamed(context, '/admin');
+        if (mounted) Navigator.pushReplacementNamed(context, '/admin');
       } else if (userRole == 'Customer') {
-        print('Redirecting to consoles page'); // Debug print
-        Navigator.pushReplacementNamed(context, '/consoles');
+        if (mounted) Navigator.pushReplacementNamed(context, '/consoles');
       } else {
-        print('Unknown role: $userRole'); // Debug print
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Unknown user role: $userRole')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Unknown user role: $userRole')),
+          );
+        }
       }
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Login gagal! Periksa username atau password.')),
-    );
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Login gagal! Periksa username atau password.')),
+      );
+    }
   } catch (e) {
-    print('Login error: $e'); // Debug print
-    setState(() => loading = false);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Login error: ${e.toString()}')),
-    );
+    if (mounted) {
+      setState(() => loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Login error: ${e.toString()}')),
+      );
+    }
   }
 }
 
@@ -133,7 +133,7 @@ class _LoginPageState extends State<LoginPage> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha: 0.9),
                       child: Padding(
                         padding: const EdgeInsets.all(24),
                         child: Column(

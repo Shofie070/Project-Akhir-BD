@@ -53,7 +53,7 @@ class _HomePageState extends State<HomePage> {
             colors: [
               Color(0xFF1A237E),
               Color(0xFF303F9F),
-              Color(0xFF3949AB).withOpacity(0.9),
+              Color(0xFF3949AB).withValues(alpha: 0.9),
             ],
           ),
         ),
@@ -145,7 +145,7 @@ class _HomePageState extends State<HomePage> {
                                 end: Alignment.bottomRight,
                                 colors: [
                                   Colors.white,
-                                  Colors.white.withOpacity(0.9),
+                                  Colors.white.withValues(alpha: 0.9),
                                 ],
                               ),
                             ),
@@ -184,7 +184,7 @@ class _HomePageState extends State<HomePage> {
                               ),
                               trailing: Container(
                                 decoration: BoxDecoration(
-                                  color: Color(0xFF1A237E).withOpacity(0.1),
+                                  color: Color(0xFF1A237E).withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 padding: EdgeInsets.all(8),

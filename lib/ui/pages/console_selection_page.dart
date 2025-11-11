@@ -26,15 +26,19 @@ class _ConsoleSelectionPageState extends State<ConsoleSelectionPage> {
   Future<void> _loadConsoles() async {
     try {
       final allConsoles = await api.fetchConsoles();
-      setState(() {
-        consoles = allConsoles; // Tampilkan semua console
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          consoles = allConsoles; // Tampilkan semua console
+          isLoading = false;
+        });
+      }
     } catch (e) {
-      setState(() => isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error loading consoles: ${e.toString()}')),
-      );
+      if (mounted) {
+        setState(() => isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading consoles: ${e.toString()}')),
+        );
+      }
     }
   }
 
@@ -42,15 +46,19 @@ class _ConsoleSelectionPageState extends State<ConsoleSelectionPage> {
     try {
       setState(() => isLoading = true);
       final allGames = await api.fetchGames();
-      setState(() {
-        games = allGames.where((g) => g.platform == platform).toList();
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          games = allGames.where((g) => g.platform == platform).toList();
+          isLoading = false;
+        });
+      }
     } catch (e) {
-      setState(() => isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error loading games: ${e.toString()}')),
-      );
+      if (mounted) {
+        setState(() => isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading games: ${e.toString()}')),
+        );
+      }
     }
   }
 

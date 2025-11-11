@@ -14,13 +14,25 @@ class GamePage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(game.namaGame, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            Text(
+              game.namaGame,
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 8),
-            Text('Genre: ${game.genre ?? "-"}', style: const TextStyle(fontSize: 16)),
+            Text(
+              'Genre: ${game.genre ?? "-"}',
+              style: const TextStyle(fontSize: 16),
+            ),
             const SizedBox(height: 8),
-            Text('Platform: ${game.platform ?? "-"}', style: const TextStyle(fontSize: 16)),
+            Text(
+              'Platform: ${game.platform ?? "-"}',
+              style: const TextStyle(fontSize: 16),
+            ),
             const SizedBox(height: 16),
-            const Text('Deskripsi:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text(
+              'Deskripsi:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 8),
             const Text('Tidak ada deskripsi tersedia.'),
           ],

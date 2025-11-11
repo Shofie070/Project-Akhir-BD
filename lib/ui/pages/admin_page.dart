@@ -23,15 +23,19 @@ class _AdminPageState extends State<AdminPage> {
   Future<void> _loadBookings() async {
     try {
       final data = await api.getBookings();
-      setState(() {
-        bookings = data;
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          bookings = data;
+          isLoading = false;
+        });
+      }
     } catch (e) {
-      setState(() => isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error loading bookings: ${e.toString()}')),
-      );
+      if (mounted) {
+        setState(() => isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading bookings: ${e.toString()}')),
+        );
+      }
     }
   }
 
@@ -53,17 +57,21 @@ class _AdminPageState extends State<AdminPage> {
   Future<void> _updateBookingStatus(int bookingId, String status) async {
     try {
       await api.updateBookingStatus(bookingId, status);
-      _loadBookings(); // Reload the list
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Booking status updated to $status')),
-      );
+      if (mounted) {
+        _loadBookings(); // Reload the list
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Booking status updated to $status')),
+        );
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to update booking status: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to update booking status: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -90,7 +98,7 @@ class _AdminPageState extends State<AdminPage> {
             colors: [
               Color(0xFF1A237E),
               Color(0xFF303F9F),
-              Color(0xFF3949AB).withOpacity(0.9),
+              Color(0xFF3949AB).withValues(alpha: 0.9),
             ],
           ),
         ),
@@ -175,17 +183,17 @@ class _AdminPageState extends State<AdminPage> {
                                       children: [
                                         TextButton(
                                           onPressed: () => _updateBookingStatus(booking['id'], 'approved'),
-                                          child: const Text('Approve'),
                                           style: TextButton.styleFrom(
                                             foregroundColor: Colors.green,
                                           ),
+                                          child: const Text('Approve'),
                                         ),
                                         TextButton(
                                           onPressed: () => _updateBookingStatus(booking['id'], 'rejected'),
-                                          child: const Text('Reject'),
                                           style: TextButton.styleFrom(
                                             foregroundColor: Colors.red,
                                           ),
+                                          child: const Text('Reject'),
                                         ),
                                       ],
                                     )
@@ -273,7 +281,7 @@ class _AdminPageState extends State<AdminPage> {
               end: Alignment.bottomRight,
               colors: [
                 Colors.white,
-                Colors.white.withOpacity(0.9),
+                Colors.white.withValues(alpha: 0.9),
               ],
             ),
           ),
