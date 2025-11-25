@@ -18,13 +18,11 @@ class ApiService {
   ApiService({this.baseUrl = 'http://localhost:4000/api'});
 
   Future<Map<String, dynamic>> createBooking(Map<String, dynamic> bookingData) async {
-    if (token == null) throw Exception('Not authenticated');
-    
+    // Booking endpoint on the backend does not require authentication in the current setup.
     final res = await http.post(
       Uri.parse('$baseUrl/bookings'),
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
       },
       body: jsonEncode(bookingData),
     );
@@ -49,14 +47,8 @@ class ApiService {
   }
 
   Future<List<Map<String, dynamic>>> getBookings() async {
-    if (token == null) throw Exception('Not authenticated');
-    
-    final res = await http.get(
-      Uri.parse('$baseUrl/bookings'),
-      headers: {
-        'Authorization': 'Bearer $token',
-      },
-    );
+    // Allow fetching bookings without token if backend does not enforce auth.
+    final res = await http.get(Uri.parse('$baseUrl/bookings'));
     
     if (res.statusCode == 200) {
       final List data = jsonDecode(res.body);
@@ -95,6 +87,27 @@ class ApiService {
       return ConsoleModel.fromMap({...console.toMap(), 'id': data['id']});
     } else {
       throw Exception('Failed to create console');
+    }
+  }
+
+  Future<ConsoleModel> updateConsole(ConsoleModel console) async {
+    final res = await http.put(
+      Uri.parse('$baseUrl/consoles/${console.id}'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(console.toMap()),
+    );
+    if (res.statusCode == 200) {
+      final data = jsonDecode(res.body);
+      return ConsoleModel.fromMap(data);
+    } else {
+      throw Exception('Failed to update console: ${res.body}');
+    }
+  }
+
+  Future<void> deleteConsole(int id) async {
+    final res = await http.delete(Uri.parse('$baseUrl/consoles/$id'));
+    if (res.statusCode != 200) {
+      throw Exception('Failed to delete console: ${res.body}');
     }
   }
 

@@ -1,6 +1,12 @@
+import 'dart:ui'; // Wajib untuk efek Blur
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/api_service.dart';
-import 'package:flutter_application_1/ui/pages/game_management_page.dart';
+
+// --- IMPORT HALAMAN MANAJEMEN ---
+import 'package:flutter_application_1/ui/pages/console_management_page.dart'; 
+import 'package:flutter_application_1/ui/pages/user_management_page.dart';
+import 'package:flutter_application_1/ui/pages/rental_management_page.dart';
+import 'package:flutter_application_1/ui/pages/settings_page.dart';
 
 class AdminPage extends StatefulWidget {
   const AdminPage({super.key});
@@ -10,6 +16,89 @@ class AdminPage extends StatefulWidget {
 }
 
 class _AdminPageState extends State<AdminPage> {
+  int _selectedIndex = 0;
+
+  // Daftar Halaman Admin
+  final List<Widget> _pages = [
+    const AdminDashboardView(), // Tab 0: Dashboard
+    const AdminManagementView(), // Tab 1: Menu Tombol (Semua fungsi ada disini)
+    const AdminReportsView(),    // Tab 2: Laporan
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF000E29),
+      body: Stack(
+        children: [
+          // BACKGROUND GLOBAL
+          Positioned.fill(
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: RadialGradient(
+                  center: Alignment.topLeft,
+                  radius: 1.5,
+                  colors: [Color(0xFF1A237E), Color(0xFF000000)],
+                ),
+              ),
+            ),
+          ),
+          // Dekorasi
+          _bgIcon(Icons.admin_panel_settings, Colors.red, 100, -50, null, null),
+          _bgIcon(Icons.videogame_asset, Colors.blue, null, null, -40, 100),
+
+          // CONTENT
+          SafeArea(
+            child: IndexedStack(
+              index: _selectedIndex,
+              children: _pages,
+            ),
+          ),
+        ],
+      ),
+      
+      // BOTTOM NAV
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF000E29).withOpacity(0.9),
+          border: Border(top: BorderSide(color: Colors.white.withOpacity(0.05))),
+        ),
+        child: BottomNavigationBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          currentIndex: _selectedIndex,
+          onTap: (index) => setState(() => _selectedIndex = index),
+          selectedItemColor: Colors.redAccent,
+          unselectedItemColor: Colors.white24,
+          type: BottomNavigationBarType.fixed,
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Dashboard'),
+            BottomNavigationBarItem(icon: Icon(Icons.grid_view), label: 'Manage'),
+            BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: 'Reports'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _bgIcon(IconData icon, Color color, double? top, double? left, double? right, double? bottom) {
+    return Positioned(
+      top: top, left: left, right: right, bottom: bottom,
+      child: Icon(icon, size: 150, color: color.withOpacity(0.05)),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// VIEW 1: DASHBOARD (LIST BOOKING)
+// ---------------------------------------------------------------------------
+class AdminDashboardView extends StatefulWidget {
+  const AdminDashboardView({super.key});
+  @override
+  State<AdminDashboardView> createState() => _AdminDashboardViewState();
+}
+
+class _AdminDashboardViewState extends State<AdminDashboardView> {
   final ApiService api = ApiService();
   List<Map<String, dynamic>> bookings = [];
   bool isLoading = true;
@@ -23,307 +112,176 @@ class _AdminPageState extends State<AdminPage> {
   Future<void> _loadBookings() async {
     try {
       final data = await api.getBookings();
-      if (mounted) {
-        setState(() {
-          bookings = data;
-          isLoading = false;
-        });
-      }
+      if (mounted) setState(() { bookings = data; isLoading = false; });
     } catch (e) {
-      if (mounted) {
-        setState(() => isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading bookings: ${e.toString()}')),
-        );
-      }
+      if (mounted) setState(() => isLoading = false);
     }
   }
 
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
-      case 'pending':
-        return Colors.orange;
-      case 'approved':
-        return Colors.green;
-      case 'rejected':
-        return Colors.red;
-      case 'completed':
-        return Colors.blue;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  Future<void> _updateBookingStatus(int bookingId, String status) async {
-    try {
-      await api.updateBookingStatus(bookingId, status);
-      if (mounted) {
-        _loadBookings(); // Reload the list
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Booking status updated to $status')),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to update booking status: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      case 'pending': return Colors.orangeAccent;
+      case 'approved': return Colors.greenAccent;
+      case 'rejected': return Colors.redAccent;
+      default: return Colors.grey;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Admin Dashboard',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-        backgroundColor: Color(0xFF1A237E),
-        elevation: 0,
-      ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF1A237E),
-              Color(0xFF303F9F),
-              Color(0xFF3949AB).withValues(alpha: 0.9),
-            ],
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Menu Admin',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  letterSpacing: 1,
-                  shadows: [
-                    Shadow(
-                      offset: Offset(2.0, 2.0),
-                      blurRadius: 3.0,
-                      color: Colors.black26,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
-              // Booking List
-              Card(
-                elevation: 4,
-                margin: const EdgeInsets.only(bottom: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Recent Bookings',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1A237E),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      if (isLoading)
-                        const Center(child: CircularProgressIndicator())
-                      else if (bookings.isEmpty)
-                        const Center(child: Text('No bookings found'))
-                      else
-                        ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: bookings.length,
-                          itemBuilder: (context, index) {
-                            final booking = bookings[index];
-                            return Card(
-                              margin: const EdgeInsets.only(bottom: 8),
-                              child: ListTile(
-                                title: Text('Booking #${booking['id']}'),
-                                subtitle: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+    return Padding(
+      padding: const EdgeInsets.all(24.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Overview', style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 20),
+          const Text('Recent Requests', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+          const SizedBox(height: 16),
+          Expanded(
+            child: isLoading
+                ? const Center(child: CircularProgressIndicator(color: Colors.redAccent))
+                : bookings.isEmpty
+                    ? const Center(child: Text('No bookings found', style: TextStyle(color: Colors.white54)))
+                    : ListView.builder(
+                        itemCount: bookings.length,
+                        itemBuilder: (context, index) {
+                          final booking = bookings[index];
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.05),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: Colors.white.withOpacity(0.1)),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text('Customer: ${booking['customerName']}'),
-                                    Text('Game: ${booking['gameName']}'),
-                                    Text('Console: ${booking['console']}'),
-                                    Text('Date: ${booking['date']}'),
-                                    if (booking['startTime'] != null)
-                                      Text('Time: ${booking['startTime']} - ${booking['endTime']}'),
-                                    Text(
-                                      'Status: ${booking['status']}',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: _getStatusColor(booking['status']),
-                                      ),
-                                    ),
+                                    Text('ID #${booking['id']}', style: const TextStyle(color: Colors.white54)),
+                                    Text(booking['status'].toUpperCase(), style: TextStyle(color: _getStatusColor(booking['status']), fontWeight: FontWeight.bold)),
                                   ],
                                 ),
-                                trailing: booking['status'] == 'pending' 
-                                  ? Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        TextButton(
-                                          onPressed: () => _updateBookingStatus(booking['id'], 'approved'),
-                                          style: TextButton.styleFrom(
-                                            foregroundColor: Colors.green,
-                                          ),
-                                          child: const Text('Approve'),
-                                        ),
-                                        TextButton(
-                                          onPressed: () => _updateBookingStatus(booking['id'], 'rejected'),
-                                          style: TextButton.styleFrom(
-                                            foregroundColor: Colors.red,
-                                          ),
-                                          child: const Text('Reject'),
-                                        ),
-                                      ],
-                                    )
-                                  : null,
-                              ),
-                            );
-                          },
-                        ),
-                    ],
-                  ),
+                                const SizedBox(height: 8),
+                                Text('${booking['gameName']}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                                Text('Customer: ${booking['customerName']}', style: const TextStyle(color: Colors.white70)),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// VIEW 2: MANAGEMENT MENU (SEMUA TOMBOL BERFUNGSI)
+// ---------------------------------------------------------------------------
+class AdminManagementView extends StatelessWidget {
+  const AdminManagementView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(24.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Management', style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold)),
+          const Text('Manage system resources', style: TextStyle(color: Colors.white54)),
+          const SizedBox(height: 24),
+          
+          Expanded(
+            child: GridView.count(
+              crossAxisCount: 2,
+              mainAxisSpacing: 16,
+              crossAxisSpacing: 16,
+              children: [
+                // 1. MANAGE CONSOLES
+                _buildMenuCard(
+                  context,
+                  'Manage Consoles',
+                  Icons.videogame_asset,
+                  Colors.purpleAccent,
+                  () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ConsoleManagementPage())),
                 ),
-              ),
-              Expanded(
-                child: GridView.count(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 16,
-                  crossAxisSpacing: 16,
-                  children: [
-                    _buildMenuCard(
-                      context,
-                      'Manajemen Game',
-                      Icons.sports_esports,
-                      'Tambah, edit, dan hapus game',
-                      () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const GameManagementPage(),
-                          ),
-                        );
-                      },
-                    ),
-                    _buildMenuCard(
-                      context,
-                      'Manajemen Penyewaan',
-                      Icons.assignment,
-                      'Kelola penyewaan dan pengembalian',
-                      () {
-                        // Navigate to rental management
-                      },
-                    ),
-                    _buildMenuCard(
-                      context,
-                      'Manajemen Pengguna',
-                      Icons.people,
-                      'Kelola data pengguna',
-                      () {
-                        // Navigate to user management
-                      },
-                    ),
-                    _buildMenuCard(
-                      context,
-                      'Laporan',
-                      Icons.bar_chart,
-                      'Lihat statistik dan laporan',
-                      () {
-                        // Navigate to reports
-                      },
-                    ),
-                  ],
+                
+                // 2. USERS (BERFUNGSI)
+                _buildMenuCard(
+                  context, 
+                  'Users', 
+                  Icons.people, 
+                  Colors.blue, 
+                  () => Navigator.push(context, MaterialPageRoute(builder: (_) => const UserManagementPage())),
                 ),
-              ),
-            ],
+                
+                // 3. RENTALS (BERFUNGSI)
+                _buildMenuCard(
+                  context, 
+                  'Rentals', 
+                  Icons.assignment, 
+                  Colors.orange, 
+                  () => Navigator.push(context, MaterialPageRoute(builder: (_) => const RentalManagementPage())),
+                ),
+                
+                // 4. SETTINGS (BERFUNGSI)
+                _buildMenuCard(
+                  context, 
+                  'Settings', 
+                  Icons.settings, 
+                  Colors.grey, 
+                  () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsPage())),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMenuCard(BuildContext context, String title, IconData icon, Color color, VoidCallback onTap) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: Colors.white.withOpacity(0.1)),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, color: color, size: 40),
+                const SizedBox(height: 16),
+                Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildMenuCard(BuildContext context, String title, IconData icon, String description, VoidCallback onTap) {
-    return Card(
-      elevation: 4,
-      shadowColor: Colors.black54,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(15),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(15),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.white,
-                Colors.white.withValues(alpha: 0.9),
-              ],
-            ),
-          ),
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Color(0xFF1A237E),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  icon,
-                  size: 32,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF1A237E),
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                description,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Color(0xFF3949AB),
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+// ---------------------------------------------------------------------------
+// VIEW 3: REPORTS
+// ---------------------------------------------------------------------------
+class AdminReportsView extends StatelessWidget {
+  const AdminReportsView({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return const Center(child: Text('Reports View', style: TextStyle(color: Colors.white)));
   }
 }
